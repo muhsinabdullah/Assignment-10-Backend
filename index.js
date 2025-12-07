@@ -25,13 +25,22 @@ async function run() {
   const database = client.db('petService');
   const petServices = database.collection('services');
   
-
+// post or save service to DB
   app.post('/services', async (req, res)=>{
     const data = req.body;
+    const date = new Date();
+    data.createdAt = date;
     console.log(data);
     const result = await petServices.insertOne(data);
     res.send(result)
   })
+
+// get services from DB
+app.get('/services', async (req, res)=>{
+  const result = await petServices.find().toArray();
+  res.send(result)
+})
+
 
 
     await client.db("admin").command({ ping: 1 });

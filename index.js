@@ -21,7 +21,7 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    // await client.connect();
+    await client.connect();
   const database = client.db('petService');
   const petServices = database.collection('services');
   
@@ -58,12 +58,23 @@ app.get('/my-services', async(req, res)=>{
   res.send(result)
 })
 
-app.purge('/update', async(req, res) =>{
-  const data = req.body;
+app.put('/update/:id', async (req, res) => {
+  try {
+    const { id } = req.params;          // get id from URL
+    const data = req.body;
+    
+    const query = { _id: new ObjectId(id) };
+    const updateServices = { $set: data };
+    
+    const result = await petServices.updateOne(query, updateServices);
+    res.send(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({ error: 'Failed to update service' });
+  }
+});
 
-})
-
-    // await client.db("admin").command({ ping: 1 });
+    await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // await client.close();

@@ -22,57 +22,65 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     await client.connect();
-  const database = client.db('petService');
-  const petServices = database.collection('services');
-  
-// post or save service to DB
-  app.post('/services', async (req, res)=>{
-    const data = req.body;
-    const date = new Date();
-    data.createdAt = date;
-    console.log(data);
-    const result = await petServices.insertOne(data);
-    res.send(result)
-  })
+    const database = client.db('petService');
+    const petServices = database.collection('services');
 
-// get services from DB
-app.get('/services', async (req, res)=>{
-  const result = await petServices.find().toArray();
-  res.send(result)
-})
+    // post or save service to DB
+    app.post('/services', async (req, res) => {
+      const data = req.body;
+      const date = new Date();
+      data.createdAt = date;
+      console.log(data);
+      const result = await petServices.insertOne(data);
+      res.send(result)
+    })
 
-app.get('/services/:id', async(req, res)=>{
-    const id = req.params
-    console.log(id);
+    // get services from DB
+    app.get('/services', async (req, res) => {
+      const result = await petServices.find().toArray();
+      res.send(result)
+    })
 
-    const query = {_id: new ObjectId(id)}
-    const result = await petServices.findOne(query)
-    res.send(result)
-})
+    app.get('/services/:id', async (req, res) => {
+      const id = req.params
+      console.log(id);
 
-app.get('/my-services', async(req, res)=>{
-  const {email} = req.query
-  console.log(email);
-  const query = {email: email}
-  const result = await petServices.find().toArray()
-  res.send(result)
-})
+      const query = { _id: new ObjectId(id) }
+      const result = await petServices.findOne(query)
+      res.send(result)
+    })
 
-app.put('/update/:id', async (req, res) => {
-  try {
-    const { id } = req.params;          // get id from URL
-    const data = req.body;
-    
-    const query = { _id: new ObjectId(id) };
-    const updateServices = { $set: data };
-    
-    const result = await petServices.updateOne(query, updateServices);
-    res.send(result);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send({ error: 'Failed to update service' });
-  }
-});
+    app.get('/my-services', async (req, res) => {
+      const { email } = req.query
+      console.log(email);
+      const query = { email: email }
+      const result = await petServices.find().toArray()
+      res.send(result)
+    })
+
+    app.put('/update/:id', async (req, res) => {
+      try {
+        const { id } = req.params;
+        const data = req.body;
+
+        const query = { _id: new ObjectId(id) };
+        const updateServices = { $set: data };
+
+        const result = await petServices.updateOne(query, updateServices);
+        res.send(result);
+      } catch (err) {
+        console.error(err);
+        res.status(500).send({ error: 'Failed to update service' });
+      }
+    });
+
+    app.delete('/delete/:id', async (req, res) => {
+      const id = req.params
+      const query = { _id: new ObjectId(id) };
+
+      const result = await petServices.deleteOne(query);
+      res.send(result);
+    })
 
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
@@ -82,9 +90,9 @@ app.put('/update/:id', async (req, res) => {
 }
 run().catch(console.dir);
 
-app.get('/',(req, res)=>{
-    res.send('hello developers');
+app.get('/', (req, res) => {
+  res.send('hello developers');
 })
-app.listen(port, ()=>{
-    console.log(`sever is running on ${port}`);
+app.listen(port, () => {
+  console.log(`sever is running on ${port}`);
 })
